@@ -1,8 +1,20 @@
+rem ============================================================
+rem   Это бат скрипт (Windows) для резервного копирования  
+rem   папок и файлов с linux машины на текущий компьютер (Windows).
+rem   Для работы скрипта нужно: 
+rem     - На компьютере Windows был установлен putty
+rem     - Достаточно свободного места на компьютере Windows
+rem     - Ип адрес linux машины 
+rem     - На linux машине доступ по ssh, ssh порт
+rem     - Пользователь/Пароль ssh у которого есть доступ
+rem         на копирования файлов/папок из linux машины
+rem ============================================================
+
 @echo off
 
-rem =====================================================
-rem GLOBALS
-rem =====================================================
+rem ============================================================
+rem   Глобальные переменные
+rem ============================================================
 
 set backupHost=
 set backupHostPort=
@@ -10,9 +22,9 @@ set backupHostUser=
 set backupHostPass=
 set localPath=
 
-rem =====================================================
-rem Date is backup dir
-rem =====================================================
+rem ============================================================
+rem   Берем дату (сегодня)
+rem ============================================================
 
 for /f "tokens=2 delims==" %%G in ('wmic os get localdatetime /value') do set datetime=%%G
 set year=%datetime:~0,4%
@@ -21,29 +33,16 @@ set day=%datetime:~6,2%
 set dt=%year%-%month%-%day%
 set localPath=%localPath%\%dt%
 
-rem =====================================================
-rem Create dir
-rem =====================================================
+rem ============================================================
+rem   Подготавливаем локалные папки
+rem ============================================================
 
 mkdir %dt%
-mkdir %localPath%\etc
-mkdir %localPath%\usr
-mkdir %localPath%\usr\share
-mkdir %localPath%\usr\share\nginx
+mkdir %localPath%\var
+mkdir %localPath%\var\www
 
-rem =====================================================
-rem Backup Script
-rem =====================================================
+rem ============================================================
+rem   Копируем файлы/папки с линукс сервера на локальный каталог
+rem ============================================================
 
-"C:\Program Files\PuTTY\plink" -P %backupHostPort% -batch -pw %backupHostPass% %backupHostUser%@%backupHost% /root/backup/remoteBackupDatabase.sh
-"C:\Program Files\PuTTY\pscp" -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/root/backup/database.sql.gz %localPath%
-"C:\Program Files\PuTTY\plink" -P %backupHostPort% -batch -pw %backupHostPass% %backupHostUser%@%backupHost% rm -f /root/backup/database.sql.gz
-
-"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/etc %localPath%/etc
-"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/usr/share/nginx %localPath%/usr/share/nginx
-
-rem =====================================================
-rem remoteBackupDatabase.sh
-rem =====================================================
-/root/backup/remoteBackupDatabase.sh
-mysqldump -u 'root' -p'' --all-databases | gzip > /root/backup/database.sql.gz
+"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/var/www %localPath%/var/www
