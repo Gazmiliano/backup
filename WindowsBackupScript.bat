@@ -1,3 +1,5 @@
+@echo off
+
 rem ============================================================
 rem   Это бат скрипт (Windows) для резервного копирования  
 rem   папок и файлов с linux машины на текущий компьютер (Windows).
@@ -10,20 +12,18 @@ rem     - Пользователь/Пароль ssh у которого есть
 rem         на копирования файлов/папок из linux машины
 rem ============================================================
 
-@echo off
-
 rem ============================================================
-rem   Глобальные переменные
+rem   Globals
 rem ============================================================
 
-set backupHost=
-set backupHostPort=
-set backupHostUser=
-set backupHostPass=
-set localPath=
+set backupHost=192.168.8.103
+set backupHostPort=22
+set backupHostUser=backup
+set backupHostPass=Qwer123~~
+set localPath=C:\Users\Gaziz\Desktop\backup
 
 rem ============================================================
-rem   Берем дату (сегодня)
+rem   Get today date
 rem ============================================================
 
 for /f "tokens=2 delims==" %%G in ('wmic os get localdatetime /value') do set datetime=%%G
@@ -34,15 +34,16 @@ set dt=%year%-%month%-%day%
 set localPath=%localPath%\%dt%
 
 rem ============================================================
-rem   Подготавливаем локалные папки
+rem   Prepare local dir
 rem ============================================================
 
 mkdir %dt%
 mkdir %localPath%\var
-mkdir %localPath%\var\www
+rem mkdir %localPath%\var\www
 
 rem ============================================================
-rem   Копируем файлы/папки с линукс сервера на локальный каталог
+rem   Remote copy
 rem ============================================================
 
-"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/var/www %localPath%/var/www
+"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/var/www %localPath%/var
+"C:\Program Files\PuTTY\pscp" -r -P %backupHostPort% -pw %backupHostPass% %backupHostUser%@%backupHost%:/var/www/html/index.nginx-debian.html %localPath%
